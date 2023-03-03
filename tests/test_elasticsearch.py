@@ -56,6 +56,20 @@ class ElasticSearch(BaseTest):
             )
         )
 
+    def test_elasticsearch_with_prequery_filter(self):
+        factory = self.replay_flight_data("test_elasticsearch_with_prequery_filter")
+        p = self.load_policy(
+            {
+                "name": "es-query-2",
+                "resource": "elasticsearch",
+                "query": [{"EngineType": "OpenSearch"}],
+            },
+            session_factory=factory,
+        )
+        resources = p.run()
+        self.assertEqual(len(resources), 1)
+        self.assertEqual(resources[0]["DomainName"], "c7n-test-opensearch")
+
     def test_metrics_domain(self):
         factory = self.replay_flight_data("test_elasticsearch_delete")
         p = self.load_policy(
