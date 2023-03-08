@@ -12,7 +12,6 @@ def cli():
     some simple tooling to sync poetry files to setup/pip
     """
 
-
 @cli.command()
 @click.option('-p', '--package-dir', type=click.Path())
 @click.option('-f', '--version-file', type=click.Path())
