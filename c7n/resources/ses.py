@@ -6,6 +6,7 @@ from c7n.query import DescribeSource, QueryResourceManager, TypeInfo
 from c7n.utils import local_session, type_schema
 from c7n.tags import universal_augment
 
+
 class DescribeConfigurationSet(DescribeSource):
 
     def augment(self, resources):
@@ -73,3 +74,17 @@ class SetDeliveryOptions(BaseAction):
                     'TlsPolicy': tls_policy
                 },
             )
+
+
+@resources.register('ses-email-identity')
+class SESEmailIdentity(QueryResourceManager):
+    class resource_type(TypeInfo):
+        service = 'sesv2'
+        enum_spec = ('list_email_identities', 'EmailIdentities', None)
+        detail_spec = ('get_email_identity', 'EmailIdentity', 'IdentityName', None)
+        name = id = 'IdentityName'
+        arn_type = 'identity'
+        universal_taggable = object()
+        permission_prefix = 'ses'
+        arn_service = 'ses'
+        cfn_type = 'AWS::SES::EmailIdentity'
