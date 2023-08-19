@@ -49,7 +49,9 @@ class ResultsReporter:
 
 def run_policy(policy, terraform_dir, tmp_path):
     (tmp_path / "policies.json").write_text(json.dumps({"policies": [policy]}, indent=2))
-    config = Config.empty(policy_dir=tmp_path, source_dir=terraform_dir, exec_filter=None)
+    config = Config.empty(
+        policy_dir=tmp_path, source_dir=terraform_dir, exec_filter=None, var_files=()
+    )
     policies = utils.load_policies(tmp_path, config)
     reporter = ResultsReporter()
     core.CollectionRunner(policies, config, reporter).run()
@@ -255,6 +257,116 @@ def test_provider_parse():
         "line_end": 8,
         "src_dir": Path("tests") / "terraform" / "ec2_stop_protection_disabled",
     }
+
+
+@pytest.fixture
+def var_tf_setup(tmp_path):
+    (tmp_path / "tf").mkdir()
+    (tmp_path / "tf" / "main.tf").write_text(
+        """
+variable balancer_type {
+  type = string
+  default = "application"
+}
+
+resource "aws_alb" "positive1" {
+  name               = "test-lb-tf"
+  internal           = false
+  load_balancer_type = var.balancer_type
+  subnets            = aws_subnet.public.*.id
+}
+        """
+    )
+
+
+#
+# we can't test env vars, as they need to be set before
+# we import tfparse. manually verified they work as expected.
+#
+# def xtest_graph_var_env(test, tmp_path, var_tf_setup):
+#    os.putenv("TF_VAR_balancer_type", "network")
+#    graph = TerraformProvider().parse(tmp_path / "tf")
+#    resources = list(graph.get_resources_by_type("aws_alb"))
+#    assert resources[0][1][0]['load_balancer_type'] == 'network'
+
+
+def test_graph_non_root_var_file(tmp_path, var_tf_setup):
+    (tmp_path / "vars.tfvars").write_text('balancer_type = "network"')
+    graph = TerraformProvider().parse(tmp_path / "tf", (tmp_path / "vars.tfvars",))
+    resources = list(graph.get_resources_by_type("aws_alb"))
+    assert resources[0][1][0]['load_balancer_type'] == 'network'
+
+
+def test_graph_var_auto_default_json(tmp_path, var_tf_setup):
+    (tmp_path / "tf" / "terraform.tfvars.json").write_text(json.dumps({'balancer_type': 'network'}))
+    graph = TerraformProvider().parse(tmp_path / "tf")
+    resources = list(graph.get_resources_by_type("aws_alb"))
+    assert resources[0][1][0]['load_balancer_type'] == 'network'
+
+
+def test_graph_var_auto_default(tmp_path, var_tf_setup):
+    (tmp_path / "tf" / "terraform.tfvars").write_text('balancer_type = "network"')
+    graph = TerraformProvider().parse(tmp_path / "tf")
+    resources = list(graph.get_resources_by_type("aws_alb"))
+    assert resources[0][1][0]['load_balancer_type'] == 'network'
+
+
+def test_graph_var_auto(tmp_path, var_tf_setup):
+    (tmp_path / "tf" / "vars.auto.tfvars").write_text('balancer_type = "network"')
+    graph = TerraformProvider().parse(tmp_path / "tf")
+    resources = list(graph.get_resources_by_type("aws_alb"))
+    assert resources[0][1][0]['load_balancer_type'] == 'network'
+
+
+def test_graph_var_file_abs(tmp_path, var_tf_setup):
+    (tmp_path / "tf" / "vars.tfvars").write_text('balancer_type = "network"')
+    graph = TerraformProvider().parse(tmp_path / "tf", (tmp_path / "tf" / "vars.tfvars",))
+    resources = list(graph.get_resources_by_type("aws_alb"))
+    assert resources[0][1][0]['load_balancer_type'] == 'network'
+
+
+def test_graph_var_file(tmp_path, var_tf_setup):
+    (tmp_path / "tf" / "vars.tfvars").write_text('balancer_type = "network"')
+    graph = TerraformProvider().parse(tmp_path / "tf", ("vars.tfvars",))
+    resources = list(graph.get_resources_by_type("aws_alb"))
+    assert resources[0][1][0]['load_balancer_type'] == 'network'
+
+
+def test_cli_var_file(tmp_path, var_tf_setup, debug_cli_runner):
+    (tmp_path / "tf" / "vars.tfvars").write_text('balancer_type = "network"')
+    (tmp_path / "policy.json").write_text(
+        json.dumps(
+            {
+                "policies": [
+                    {
+                        "name": "check-multi",
+                        "resource": ["terraform.aws_alb"],
+                        "filters": [{"load_balancer_type": "network"}],
+                    }
+                ]
+            }
+        )
+    )
+    result = debug_cli_runner.invoke(
+        cli.cli,
+        [
+            "run",
+            "-p",
+            str(tmp_path),
+            "-d",
+            str(tmp_path / "tf"),
+            "-o",
+            "json",
+            "--var-file",
+            tmp_path / "tf" / "vars.tfvars",
+            "--output-file",
+            str(tmp_path / "output.json"),
+        ],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+    data = json.loads((tmp_path / "output.json").read_text())
+    assert len(data["results"]) == 1
 
 
 def test_multi_resource_list_policy(tmp_path):
