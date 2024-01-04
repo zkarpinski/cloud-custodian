@@ -9,9 +9,10 @@ import threading
 from botocore.exceptions import ClientError
 
 from c7n.credentials import assumed_session
+
 # from c7n.executor import MainThreadExecutor
 from c7n.filters import Filter
-from c7n.query import QueryResourceManager, TypeInfo
+from c7n.query import QueryResourceManager, TypeInfo, DescribeSource
 from c7n.resources.aws import AWS
 from c7n.tags import universal_augment
 from c7n.utils import local_session, type_schema
@@ -94,6 +95,61 @@ class OrgPolicy(QueryResourceManager, OrgAccess):
         if not params:
             params['Filter'] = "SERVICE_CONTROL_POLICY"
         return params
+
+
+class DescribeUnit(DescribeSource):
+    org_type = "ORGANIZATIONAL_UNIT"
+
+    def get_permissions(self):
+        m = self.manager.get_model()
+        return list(m.permissions_augment)
+
+    def resources(self, query=None):
+        if query is None:
+            query = {}
+        client = local_session(self.manager.session_factory).client('organizations')
+        if 'ParentId' not in query:
+            query['ParentId'] = client.list_roots().get('Roots', ())[0].get('Id')
+        ous = {}
+        self.fetch_ous(client, query['ParentId'], ous, [query['ParentId']])
+        return universal_augment(self.manager, list(ous.values()))
+
+    def fetch_ous(self, client, parent_id, units, stack):
+        pager = client.get_paginator('list_children')
+        ou_ids = [
+            o['Id']
+            for o in pager.paginate(ParentId=parent_id, ChildType=self.org_type)
+            .build_full_result()
+            .get('Children')
+        ]
+        for ou_id in ou_ids:
+            units[ou_id] = ou = client.describe_organizational_unit(
+                OrganizationalUnitId=ou_id,
+            )['OrganizationalUnit']
+            ou['Parents'] = list(stack)
+            stack.append(ou_id)
+            ou['Path'] = "/".join([units[p]['Name'] for p in stack if p.startswith('ou')])
+            self.fetch_ous(client, ou_id, units, stack)
+            stack.pop(-1)
+
+
+@AWS.resources.register("org-unit")
+class OrgUnit(QueryResourceManager):
+    class resource_type(TypeInfo):
+        service = "organizations"
+        arn = "Arn"
+        arn_type = "ou"
+        name = "Name"
+        id = "Id"
+        global_resource = True
+        permissions_augment = (
+            "organizations:ListChildren",
+            "organizations:DescribeOrganizationalUnit",
+            "organizations:ListTagsForResource",
+        )
+        universal_augment = object()
+
+    source_mapping = {'describe': DescribeUnit}
 
 
 @AWS.resources.register("org-account")
