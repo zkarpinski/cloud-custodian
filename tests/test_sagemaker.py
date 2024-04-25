@@ -598,6 +598,45 @@ class TestSageMakerAutoMLJob(BaseTest):
         assert "JobTag" not in [tag["Key"] for tag in tags]
 
 
+class TestSageMakerModelBiasJobDefinition(BaseTest):
+
+    def test_sagemaker_model_bias_job_query(self):
+        session_factory = self.record_flight_data("test_sagemaker_model_bias_job_definition_query")
+        p = self.load_policy(
+            {
+                "name": "query-model-bias-job-definition",
+                "resource": "sagemaker-model-bias-job-definition",
+            },
+            session_factory=session_factory,
+        )
+        resources = p.run()
+        self.assertEqual(len(resources), 1)
+
+    def test_delete_sagemaker_model_bias_job_definition(self):
+        session_factory = self.record_flight_data("test_sagemaker_model_bias_job_definition_delete")
+        client = session_factory(region="us-east-1").client("sagemaker")
+        p = self.load_policy(
+            {
+                "name": "delete-model-bias-job-definition",
+                "resource": "sagemaker-model-bias-job-definition",
+                "filters": [
+                    {
+                        "type": "value",
+                        "key": "AutoMLJobName",
+                        "value": "test",
+                        "op": "contains",
+                    }
+                ],
+                "actions": [{"type": "delete"}],
+            },
+            session_factory=session_factory,
+        )
+        resources = p.run()
+        self.assertEqual(len(resources), 1)
+        # TODO: Add a check here to see if the job definition is deleted
+        # job = client.describe_model_bias_job_definition(JobDefinitionName=resources[0]["JobDefinitionName"])
+
+
 class TestSagemakerEndpoint(BaseTest):
 
     def test_sagemaker_endpoints(self):
