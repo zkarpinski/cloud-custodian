@@ -571,6 +571,30 @@ class SagemakerModelQualityJobDefinition(QueryResourceManager):
     source_mapping = {'describe': SagemakerModelQualityJobDefinitionDescribe}
 
 
+class SagemakerModelBiasJobDefinitionDescribe(DescribeSource):
+
+    def augment(self, resources):
+        return universal_augment(self.manager, super().augment(resources))
+
+
+@resources.register('sagemaker-model-bias-job-definition')
+class SagemakerModelBiasJobDefinition(QueryResourceManager):
+
+    class resource_type(TypeInfo):
+        service = 'sagemaker'
+        enum_spec = ('list_model_bias_job_definitions', 'JobDefinitionSummaries', None)
+        detail_spec = (
+            'describe_model_bias_job_definition', 'JobDefinitionName',
+            'MonitoringJobDefinitionName', None)
+        arn = id = 'JobDefinitionArn'
+        name = 'JobDefinitionName'
+        date = 'CreationTime'
+        permissions_prefix = 'sagemaker'
+        universal_taggable = object()
+
+    source_mapping = {'describe': SagemakerModelBiasJobDefinitionDescribe}
+
+
 @SagemakerEndpoint.action_registry.register('tag')
 @SagemakerEndpointConfig.action_registry.register('tag')
 @NotebookInstance.action_registry.register('tag')
@@ -1067,6 +1091,23 @@ class SagemakerModelQualityJobDefinitionDelete(BaseAction):
             try:
                 client.delete_model_quality_job_definition(
                     JobDefinitionName=j['JobDefinitionName'])
+            except client.exceptions.ResourceNotFound:
+                pass
+
+
+@SagemakerModelBiasJobDefinition.action_registry.register('delete')
+class SagemakerModelBiasJobDefinitionDelete(BaseAction):
+    """ Deletes sagemaker-model-bias-job-definition """
+    schema = type_schema('delete')
+    permissions = ('sagemaker:DeleteModelBiasJobDefinition',)
+
+    def process(self, definitions):
+        client = local_session(self.manager.session_factory).client('sagemaker')
+
+        for d in definitions:
+            try:
+                client.delete_model_bias_job_definition(
+                    JobDefinitionName=d['JobDefinitionName'])
             except client.exceptions.ResourceNotFound:
                 pass
 

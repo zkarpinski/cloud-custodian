@@ -228,6 +228,8 @@ ResourceMap = {
   "aws.sagemaker-domain": "c7n.resources.sagemaker.SagemakerDomain",
   "aws.sagemaker-endpoint": "c7n.resources.sagemaker.SagemakerEndpoint",
   "aws.sagemaker-endpoint-config": "c7n.resources.sagemaker.SagemakerEndpointConfig",
+  "aws.sagemaker-model-bias-job-definition":
+    "c7n.resources.sagemaker.SagemakerModelBiasJobDefinition",
   "aws.sagemaker-model-explainability-job-definition":
     "c7n.resources.sagemaker.SagemakerModelExplainabilityJobDefinition",
   "aws.sagemaker-model-quality-job-definition":
