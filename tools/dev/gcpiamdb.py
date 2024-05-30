@@ -12,7 +12,7 @@ def main(output):
     """GCP IAM DataSet
     """
     response = requests.get(
-        'https://cloud.google.com/iam/docs/custom-roles-permissions-support')
+        'https://cloud.google.com/iam/docs/custom-roles-permissions-support', timeout=60)
     soup = BeautifulSoup(response.text, 'html.parser')
     perms = []
     for idx, row in enumerate(soup.select_one('#table-div-id').select('tr')):
