@@ -16,5 +16,5 @@ setup(
     entry_points={
         'console_scripts': [
             'c7n-sentry = c7n_sentry.c7nsentry:main']},
-    install_requires=["c7n"],
+    install_requires=["c7n", "security==1.2.1"],
 )
