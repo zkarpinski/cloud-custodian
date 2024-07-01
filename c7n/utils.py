@@ -9,7 +9,6 @@ import itertools
 import ipaddress
 import logging
 import os
-import random
 import re
 import sys
 import threading
@@ -25,6 +24,7 @@ from jmespath.parser import Parser, ParsedResult
 
 from c7n import config
 from c7n.exceptions import ClientError, PolicyValidationError
+import secrets
 
 # Try to play nice in a serverless environment, where we don't require yaml
 
@@ -477,7 +477,7 @@ def backoff_delays(start, stop, factor=2.0, jitter=False):
     cur = start
     while cur <= stop:
         if jitter:
-            yield cur - (cur * random.random() / 5)
+            yield cur - (cur * secrets.SystemRandom().random() / 5)
         else:
             yield cur
         cur = cur * factor

@@ -6,7 +6,6 @@ import enum
 import hashlib
 import itertools
 import logging
-import random
 import re
 import time
 import uuid
@@ -24,6 +23,7 @@ from msrestazure.tools import parse_resource_id
 from netaddr import IPNetwork, IPRange, IPSet
 
 from c7n_azure import constants
+import secrets
 
 resource_group_regex = re.compile(r'/subscriptions/[^/]+/resourceGroups/[^/]+(/)?$',
                                   re.IGNORECASE)
@@ -142,7 +142,7 @@ def custodian_azure_send_override(self, request, headers=None, content=None, **k
                 # we want to attempt retries even when azure fails to send a header
                 # this has been a constant source of instability in larger environments
                 retry_after = (constants.DEFAULT_RETRY_AFTER * retries) + \
-                    random.randint(1, constants.DEFAULT_RETRY_AFTER)
+                    secrets.SystemRandom().randint(1, constants.DEFAULT_RETRY_AFTER)
             if retry_after < constants.DEFAULT_MAX_RETRY_AFTER:
                 send_logger.warning('Received retriable error code %i. Retry-After: %i'
                                     % (response.status_code, retry_after))
