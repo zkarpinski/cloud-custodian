@@ -3,7 +3,6 @@
 import base64
 import itertools
 import operator
-import random
 import re
 import zlib
 from typing import List
@@ -33,6 +32,7 @@ from c7n.utils import type_schema, filter_empty, jmespath_search, jmespath_compi
 
 from c7n.resources.iam import CheckPermissions, SpecificIamProfileManagedPolicy
 from c7n.resources.securityhub import PostFinding
+import secrets
 
 RE_ERROR_INSTANCE_ID = re.compile("'(?P<instance_id>i-.*?)'")
 
@@ -85,7 +85,7 @@ class DescribeEC2(query.DescribeSource):
         if search_count > resource_count:
             search_count = resource_count
         found = False
-        for r in random.sample(resources, search_count):
+        for r in secrets.SystemRandom().sample(resources, search_count):
             if 'Tags' in r:
                 found = True
                 break

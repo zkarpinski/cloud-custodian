@@ -15,7 +15,6 @@ import re
 from dateutil.tz import tzutc
 from dateutil.parser import parse
 from c7n.vendored.distutils import version
-from random import sample
 
 from c7n.element import Element
 from c7n.exceptions import PolicyValidationError, PolicyExecutionError
@@ -31,6 +30,7 @@ from c7n.utils import (
     jmespath_compile
 )
 from c7n.manager import iter_filters
+import secrets
 
 
 class FilterValidationError(Exception):
@@ -1066,7 +1066,7 @@ class ReduceFilter(BaseValueFilter):
 
     def reorder(self, items, key=None):
         if self.order == 'randomize':
-            return sample(items, k=len(items))
+            return secrets.SystemRandom().sample(items, k=len(items))
         elif self.order == 'reverse':
             return items[::-1]
         else:

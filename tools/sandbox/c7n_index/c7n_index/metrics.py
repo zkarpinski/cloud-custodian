@@ -3,7 +3,6 @@
 import datetime
 import logging
 import math
-import random
 import time
 
 import boto3
@@ -22,6 +21,7 @@ from c7n.registry import PluginRegistry
 from c7n.reports import csvout as s3_resource_parser
 from c7n.resources import load_resources
 from c7n.utils import chunks, dumps, get_retry, local_session
+import secrets
 
 # from c7n.executor import MainThreadExecutor
 # ThreadPoolExecutor = MainThreadExecutor
@@ -435,7 +435,7 @@ def index_metrics(
         # region, go ahead and shuffle, at least with lucene, the non ordering
         # should have minimal impact on query perf (inverted index).
 
-        random.shuffle(jobs)
+        secrets.SystemRandom().shuffle(jobs)
 
         for j in jobs:
             log.debug("submit account:%s region:%s start:%s end:%s" % (
