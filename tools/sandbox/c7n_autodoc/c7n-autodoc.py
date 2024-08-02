@@ -81,7 +81,7 @@ def gather_file_data(config):
                         else:
                             category = 'Cost Controls'
 
-                        policies = yaml.load(stream)
+                        policies = yaml.load(stream, Loader=yaml.SafeLoader)
                         for policy in policies['policies']:
                             logging.debug(
                                 'Processing policy %s', policy['name'])
