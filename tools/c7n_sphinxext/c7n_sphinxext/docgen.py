@@ -40,7 +40,7 @@ def template_underline(value, under="="):
 
 
 def get_environment(provider):
-    env = Environment(loader=PackageLoader('c7n_sphinxext', '_templates'))
+    env = Environment(loader=PackageLoader('c7n_sphinxext', '_templates'), autoescape=True)
     env.globals['underline'] = template_underline
     env.globals['ename'] = ElementSchema.name
     env.globals['edoc'] = ElementSchema.doc
