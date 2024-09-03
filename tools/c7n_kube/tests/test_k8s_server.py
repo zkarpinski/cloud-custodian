@@ -131,7 +131,7 @@ class TestServer(KubeTest):
     def test_server_handle_get_empty_policies(self):
         policies = {"policies": []}
         with self._server(policies) as ((_, port)):
-            res = requests.get(f"http://localhost:{port}")
+            res = requests.get(f"http://localhost:{port}", timeout=60)
             self.assertEqual(res.json(), [])
             self.assertEqual(res.status_code, 200)
 
@@ -152,7 +152,7 @@ class TestServer(KubeTest):
             ]
         }
         with self._server(policies) as ((_, port)):
-            res = requests.get(f"http://localhost:{port}")
+            res = requests.get(f"http://localhost:{port}", timeout=60)
             self.assertEqual(res.json(), policies["policies"])
             self.assertEqual(res.status_code, 200)
 
@@ -161,7 +161,7 @@ class TestServer(KubeTest):
 
         with self._server(policies) as ((_, port)):
             event = self.get_event("create_pod")
-            res = requests.post(f"http://localhost:{port}", json=event)
+            res = requests.post(f"http://localhost:{port}", json=event, timeout=60)
             self.assertEqual(res.status_code, 200)
             self.assertEqual(
                 {
@@ -195,7 +195,7 @@ class TestServer(KubeTest):
         }
         with self._server(policies) as ((_, port)):
             event = self.get_event("create_pod")
-            res = requests.post(f"http://localhost:{port}", json=event)
+            res = requests.post(f"http://localhost:{port}", json=event, timeout=60)
             self.assertEqual(res.status_code, 200)
             self.assertFalse(res.json()["response"]["allowed"])
 
@@ -217,7 +217,7 @@ class TestServer(KubeTest):
         }
         with self._server(policies) as ((_, port)):
             event = self.get_event("create_pod")
-            res = requests.post(f"http://localhost:{port}", json=event)
+            res = requests.post(f"http://localhost:{port}", json=event, timeout=60)
             self.assertEqual(res.status_code, 200)
             self.assertTrue(res.json()["response"]["allowed"])
 
@@ -264,7 +264,7 @@ class TestServer(KubeTest):
         }
         with self._server(policies) as (_, port):
             event = self.get_event("create_pod")
-            res = requests.post(f"http://localhost:{port}", json=event)
+            res = requests.post(f"http://localhost:{port}", json=event, timeout=60)
             self.assertEqual(res.status_code, 200)
             self.assertFalse(res.json()["response"]["allowed"])
             failures = json.loads(res.json()["response"]["status"]["message"].split(":", 1)[-1])
@@ -296,7 +296,7 @@ class TestServer(KubeTest):
         }
         with self._server(policies) as (_, port):
             event = self.get_event("create_pod")
-            res = requests.post(f"http://localhost:{port}", json=event)
+            res = requests.post(f"http://localhost:{port}", json=event, timeout=60)
             self.assertEqual(res.status_code, 200)
             self.assertTrue(res.json()["response"]["allowed"])
             self.assertEqual(
@@ -326,7 +326,7 @@ class TestServer(KubeTest):
     def test_server_bad_post(self):
         policies = {"policies": []}
         with self._server(policies) as (_, port):
-            res = requests.post(f"http://localhost:{port}", data="bad data")
+            res = requests.post(f"http://localhost:{port}", data="bad data", timeout=60)
             self.assertEqual(res.status_code, 400)
             self.assertEqual(res.json(), {"error": "Expecting value: line 1 column 1 (char 0)"})
 
@@ -357,7 +357,7 @@ class TestServer(KubeTest):
         }
         with self._server(policies) as (_, port):
             event = self.get_event("create_pod")
-            res = requests.post(f"http://localhost:{port}", json=event)
+            res = requests.post(f"http://localhost:{port}", json=event, timeout=60)
             self.assertEqual(res.status_code, 200)
             self.assertTrue(res.json()["response"]["allowed"])
             self.assertEqual(res.json()["response"]["warnings"], ["label-pod:warning goes here"])
@@ -400,7 +400,7 @@ class TestServer(KubeTest):
             server.policy_collection.policies.append(mock_policy_2)
 
             event = self.get_event("create_pod")
-            res = requests.post(f"http://localhost:{port}", json=event)
+            res = requests.post(f"http://localhost:{port}", json=event, timeout=60)
             self.assertEqual(res.status_code, 200)
             self.assertEqual(
                 res.json()["response"]["warnings"],
@@ -443,7 +443,7 @@ class TestServer(KubeTest):
             server.policy_collection.policies.append(mock_policy_2)
 
             event = self.get_event("create_pod")
-            res = requests.post(f"http://localhost:{port}", json=event)
+            res = requests.post(f"http://localhost:{port}", json=event, timeout=60)
             self.assertEqual(res.status_code, 200)
             self.assertFalse(res.json()["response"]["allowed"])
             failures = json.loads(res.json()["response"]["status"]["message"].split(":", 1)[-1])

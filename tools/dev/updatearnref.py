@@ -50,7 +50,7 @@ BASE_DOCUMENTATION_URL = "https://docs.aws.amazon.com/service-authorization/late
 def get_links_from_base_actions_resources_conditions_page():
     """Gets the links from the actions, resources, and conditions keys
     page, and returns their filenames."""
-    html = requests.get(BASE_DOCUMENTATION_URL)
+    html = requests.get(BASE_DOCUMENTATION_URL, timeout=60)
     soup = BeautifulSoup(html.content, "html.parser")
     html_filenames = []
     for i in soup.find("div", {"class": "highlights"}).findAll("a"):
@@ -70,7 +70,7 @@ def update_html_docs_directory(html_docs_destination):
     html_filenames = [sub.replace("./", "") for sub in initial_html_filenames_list]
 
     for page in html_filenames:
-        response = requests.get(link_url_prefix + page, allow_redirects=False)
+        response = requests.get(link_url_prefix + page, allow_redirects=False, timeout=60)
         # Replace the CSS stuff. Basically this:
         """
         <link href='href="https://docs.aws.amazon.com/images/favicon.ico"' rel="icon" type="image/ico"/>
