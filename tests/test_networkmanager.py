@@ -182,7 +182,7 @@ class TestNetworkManager(BaseTest):
 
     def test_core_network_delete_error(self):
         invalid_network_id = 'core-network-7a6b617270696e736b69'
-        factory = self.record_flight_data("test_core_network_delete_error")
+        factory = self.replay_flight_data("test_core_network_delete_error")
         client = factory().client("networkmanager")
         mock_factory = MagicMock()
         mock_factory.region = 'us-east-1'
@@ -302,6 +302,31 @@ class TestNetworkManagerSites(BaseTest):
         resources = p.run()
         self.assertEqual(len(resources), 1)
 
+    def test_site_delete_error(self):
+        invalid_site_id = 'site-7a6b617270696e736b69'
+        invalid_network_id = 'global-network-7a6b617270696e736b69'
+        mock_factory = MagicMock()
+        mock_factory.region = 'us-west-2'
+        client = mock_factory().client('networkmanager')
+
+        client.delete_site.side_effect = (
+            client.exceptions.ResourceNotFoundException(
+                {'Error': {'Code': 'xyz'}},
+                operation_name='delete_site'))
+        p = self.load_policy({
+            'name': 'delete-site-error',
+            'resource': 'networkmanager-site',
+            'actions': ['delete']},
+            session_factory=mock_factory)
+
+        try:
+            p.resource_manager.actions[0].process(
+                [{'GlobalNetworkId': invalid_network_id,
+                    'SiteId': invalid_site_id}])
+        except client.exceptions.ResourceNotFoundException:
+            self.fail('should not raise')
+        client.delete_site.assert_called_once()
+
 
 class TestNetworkManagerDevices(BaseTest):
     def test_list_devices(self):
@@ -376,6 +401,30 @@ class TestNetworkManagerDevices(BaseTest):
         resources = p.run()
         self.assertEqual(len(resources), 1)
 
+    def test_device_delete_error(self):
+        invalid_device_id = 'device-7a6b617270696e736b69'
+        invalid_network_id = 'global-network-7a6b617270696e736b69'
+        mock_factory = MagicMock()
+        mock_factory.region = 'us-west-2'
+        client = mock_factory().client('networkmanager')
+        client.delete_device.side_effect = (
+            client.exceptions.ResourceNotFoundException(
+                {'Error': {'Code': 'xyz'}},
+                operation_name='delete_device'))
+        p = self.load_policy({
+            'name': 'delete-device-error',
+            'resource': 'networkmanager-device',
+            'actions': ['delete']},
+            session_factory=mock_factory)
+
+        try:
+            p.resource_manager.actions[0].process(
+                [{'GlobalNetworkId': invalid_network_id,
+                    'DeviceId': invalid_device_id}])
+        except client.exceptions.ResourceNotFoundException:
+            self.fail('should not raise')
+        client.delete_device.assert_called_once()
+
 
 class TestNetworkManagerLinks(BaseTest):
     def test_list_links(self):
@@ -446,3 +495,27 @@ class TestNetworkManagerLinks(BaseTest):
         )
         resources = p.run()
         self.assertEqual(len(resources), 1)
+
+    def test_link_delete_error(self):
+        invalid_link_id = 'link-7a6b617270696e736b69'
+        invalid_network_id = 'global-network-7a6b617270696e736b69'
+        mock_factory = MagicMock()
+        mock_factory.region = 'us-west-2'
+        client = mock_factory().client('networkmanager')
+        client.delete_link.side_effect = (
+            client.exceptions.ResourceNotFoundException(
+                {'Error': {'Code': 'xyz'}},
+                operation_name='delete_link'))
+        p = self.load_policy({
+            'name': 'delete-link-error',
+            'resource': 'networkmanager-link',
+            'actions': ['delete']},
+            session_factory=mock_factory)
+
+        try:
+            p.resource_manager.actions[0].process(
+                [{'GlobalNetworkId': invalid_network_id,
+                    'LinkId': invalid_link_id}])
+        except client.exceptions.ResourceNotFoundException:
+            self.fail('should not raise')
+        client.delete_link.assert_called_once()
