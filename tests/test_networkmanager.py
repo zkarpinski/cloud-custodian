@@ -286,6 +286,22 @@ class TestNetworkManagerSites(BaseTest):
         self.assertEqual(len(tags), 1)
         self.assertTrue(tags[0]['Key'], "Name")
 
+    def test_delete_site(self):
+        session_factory = self.replay_flight_data("test_networkmanager_delete_site")
+        p = self.load_policy(
+            {
+                "name": "delete-site",
+                "resource": "networkmanager-site",
+                "filters": [
+                    {"tag:deleteme": "delete"}
+                ],
+                "actions": [{"type": "delete"}],
+            },
+            session_factory=session_factory,
+        )
+        resources = p.run()
+        self.assertEqual(len(resources), 1)
+
 
 class TestNetworkManagerDevices(BaseTest):
     def test_list_devices(self):
@@ -344,6 +360,22 @@ class TestNetworkManagerDevices(BaseTest):
         self.assertEqual(len(tags), 1)
         self.assertTrue(tags[0]['Key'], "Name")
 
+    def test_delete_device(self):
+        session_factory = self.replay_flight_data("test_networkmanager_delete_device")
+        p = self.load_policy(
+            {
+                "name": "delete-device",
+                "resource": "networkmanager-device",
+                "filters": [
+                    {"tag:deleteme": "delete"}
+                ],
+                "actions": [{"type": "delete"}],
+            },
+            session_factory=session_factory,
+        )
+        resources = p.run()
+        self.assertEqual(len(resources), 1)
+
 
 class TestNetworkManagerLinks(BaseTest):
     def test_list_links(self):
@@ -398,3 +430,19 @@ class TestNetworkManagerLinks(BaseTest):
         tags = client.list_tags_for_resource(ResourceArn=resources[0]["LinkArn"])["TagList"]
         self.assertEqual(len(tags), 1)
         self.assertTrue(tags[0]['Key'], "Name")
+
+    def test_delete_link(self):
+        session_factory = self.replay_flight_data("test_networkmanager_delete_link")
+        p = self.load_policy(
+            {
+                "name": "delete-link",
+                "resource": "networkmanager-link",
+                "filters": [
+                    {"tag:deleteme": "delete"}
+                ],
+                "actions": [{"type": "delete"}],
+            },
+            session_factory=session_factory,
+        )
+        resources = p.run()
+        self.assertEqual(len(resources), 1)
