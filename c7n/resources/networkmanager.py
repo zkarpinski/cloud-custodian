@@ -201,7 +201,7 @@ class DeleteSite(BaseAction):
         for r in resources:
             try:
                 client.delete_site(GlobalNetworkId=r['GlobalNetworkId'], SiteId=r['SiteId'])
-            except client.exceptions.ResourceNotFoundException:
+            except client.exceptions.ResourceNotFoundException:  # pragma: no cover
                 continue
 
 
@@ -218,7 +218,7 @@ class DeleteDevice(BaseAction):
         for r in resources:
             try:
                 client.delete_device(GlobalNetworkId=r['GlobalNetworkId'], DeviceId=r['DeviceId'])
-            except client.exceptions.ResourceNotFoundException:
+            except client.exceptions.ResourceNotFoundException:  # pragma: no cover
                 continue
 
 
@@ -235,5 +235,5 @@ class DeleteLink(BaseAction):
         for r in resources:
             try:
                 client.delete_link(GlobalNetworkId=r['GlobalNetworkId'], LinkId=r['LinkId'])
-            except client.exceptions.ResourceNotFoundException:
+            except client.exceptions.ResourceNotFoundException:  # pragma: no cover
                 continue
