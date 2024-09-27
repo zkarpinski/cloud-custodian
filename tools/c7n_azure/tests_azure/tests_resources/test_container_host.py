@@ -489,7 +489,8 @@ class ContainerHostTest(BaseTest):
         host = Host(DEFAULT_EVENT_QUEUE_ID, DEFAULT_EVENT_QUEUE_NAME, DEFAULT_POLICY_STORAGE)
 
         # Create a bad yaml file
-        file_path = tempfile.mktemp(suffix=".yaml")
+        with tempfile.NamedTemporaryFile(suffix=".yaml", delete=False) as tf:
+            file_path = tf.name
         with open(file_path, 'w') as f:
             f.write("bad yaml file")
 
@@ -520,7 +521,8 @@ class ContainerHostTest(BaseTest):
                         """
 
         # Create a bad yaml file
-        file_path = tempfile.mktemp(suffix=".yaml")
+        with tempfile.NamedTemporaryFile(suffix=".yaml", delete=False) as tf:
+            file_path = tf.name
         with open(file_path, 'w') as f:
             f.write(policy_string)
 
@@ -541,7 +543,8 @@ class ContainerHostTest(BaseTest):
         host = Host(DEFAULT_EVENT_QUEUE_ID, DEFAULT_EVENT_QUEUE_NAME, DEFAULT_POLICY_STORAGE)
 
         # Create a bad yaml file (no name field)
-        file_path = tempfile.mktemp(suffix=".yaml")
+        with tempfile.NamedTemporaryFile(suffix=".yaml", delete=False) as tf:
+            file_path = tf.name
         with open(file_path, 'w') as f:
             f.write("""
                         policies:
@@ -579,7 +582,8 @@ class ContainerHostTest(BaseTest):
                         """
 
         # Create a bad yaml file
-        file_path = tempfile.mktemp(suffix=".yaml")
+        with tempfile.NamedTemporaryFile(suffix=".yaml", delete=False) as tf:
+            file_path = tf.name
         with open(file_path, 'w') as f:
             f.write(policy_string)
 
