@@ -35,7 +35,6 @@ import json
 import logging
 import math
 import os
-import random
 import string
 import sys
 import threading
@@ -61,6 +60,7 @@ from c7n.utils import chunks, dumps
 
 from c7n_salactus.objectacl import ObjectAclCheck
 from c7n_salactus.inventory import load_bucket_inventory, get_bucket_inventory
+import secrets
 
 
 def patch_ssl():
@@ -587,7 +587,7 @@ def detect_partition_strategy(bid, delimiters=('/', '-'), prefix=''):
         charset, limit=limit).initialize_prefixes(prefixes)
 
     #
-    random.shuffle(prefixes)
+    secrets.SystemRandom().shuffle(prefixes)
 
     # Pregen on ngram means we have many potentially useless prefixes
     # todo carry charset forward as param, and go incremental on prefix

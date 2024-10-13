@@ -10,12 +10,12 @@ import functools
 import fnmatch
 import gzip
 import json
-import random
 import tempfile
 from urllib.parse import unquote_plus
 
 
 from c7n.utils import chunks
+import secrets
 
 
 def load_manifest_file(client, bucket, schema, versioned, ifilters, key_info):
@@ -97,7 +97,7 @@ def random_chain(generators):
     at random and consumed to exhaustion.
     """
     while generators:
-        g = random.choice(generators)
+        g = secrets.choice(generators)
         try:
             v = g.next()
             if v is None:
