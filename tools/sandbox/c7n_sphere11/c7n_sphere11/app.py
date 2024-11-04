@@ -64,7 +64,7 @@ def delta(account_id):
     result = controller.get_account_delta(
         account_id, request_data['region'], api_url())
     response.content_type = "application/json"
-    return json.dumps(result, indent=2, cls=Encoder)
+    return (json.dumps(result, indent=2, cls=Encoder), {'Content-Type': 'application/json'})
 
 
 @app.route("/<account_id>/locks/<resource_id>/unlock", method="POST")
