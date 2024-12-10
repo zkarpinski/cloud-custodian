@@ -202,7 +202,7 @@ class SplunkHecDelivery:
                 url,
                 headers={"Authorization": "Splunk %s" % self.config["splunk_hec_token"]},
                 data=payload,
-            )
+            timeout=60)
         except Exception:
             self.logger.error(
                 "Exception during Splunk POST to %s of %s", url, payload, exc_info=True

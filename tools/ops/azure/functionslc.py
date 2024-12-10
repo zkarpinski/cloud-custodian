@@ -56,14 +56,14 @@ def wait_for_remote_builds(deployments):
 
 def get_build_status(scm_uri):
     is_deploying_uri = '%s/api/isdeploying' % scm_uri
-    is_deploying = requests.get(is_deploying_uri).json()['value']
+    is_deploying = requests.get(is_deploying_uri, timeout=60).json()['value']
 
     if strtobool(is_deploying):
         return DeploymentStatus.Active
 
     # Get build status
     deployments_uri = '%s/deployments' % scm_uri
-    r = requests.get(deployments_uri).json()
+    r = requests.get(deployments_uri, timeout=60).json()
     if len(r) == 0:
         return DeploymentStatus.NotFound
 

@@ -13,7 +13,7 @@ URL = "https://awspolicygen.s3.amazonaws.com/js/policies.js"
 @click.command()
 @click.option('-f', '--output', default='-', type=click.File('w'))
 def main(output):
-    raw_data = requests.get(URL).text
+    raw_data = requests.get(URL, timeout=60).text
     data = json.loads(raw_data[raw_data.find('=') + 1:])
 
     perms = defaultdict(list)

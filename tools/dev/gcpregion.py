@@ -7,7 +7,7 @@ import json
 @click.command()
 @click.option('-f', '--output', type=click.File('w'), default='-')
 def main(output):
-    data = requests.get('https://www.gstatic.com/ipranges/cloud.json').json()
+    data = requests.get('https://www.gstatic.com/ipranges/cloud.json', timeout=60).json()
     regions = sorted(list(set(jmespath.search('prefixes[].scope', data))))
     regions.remove('global')
     output.write(json.dumps(regions, indent=2))
