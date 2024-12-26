@@ -15,6 +15,7 @@ from unittest.mock import patch, MagicMock
 from c7n_kube.server import AdmissionControllerServer, AdmissionControllerHandler, init
 
 from common_kube import KubeTest
+from security import safe_requests
 
 
 class MockAdmissionControllerServer(AdmissionControllerServer):
@@ -131,7 +132,7 @@ class TestServer(KubeTest):
     def test_server_handle_get_empty_policies(self):
         policies = {"policies": []}
         with self._server(policies) as ((_, port)):
-            res = requests.get(f"http://localhost:{port}")
+            res = safe_requests.get(f"http://localhost:{port}")
             self.assertEqual(res.json(), [])
             self.assertEqual(res.status_code, 200)
 
@@ -152,7 +153,7 @@ class TestServer(KubeTest):
             ]
         }
         with self._server(policies) as ((_, port)):
-            res = requests.get(f"http://localhost:{port}")
+            res = safe_requests.get(f"http://localhost:{port}")
             self.assertEqual(res.json(), policies["policies"])
             self.assertEqual(res.status_code, 200)
 
