@@ -5,12 +5,12 @@
 import json
 from time import sleep
 from urllib.parse import urlparse
-from random import uniform
 import requests
 from jsonpointer import resolve_pointer, JsonPointerException
 from jsonpatch import JsonPatch
 from copy import deepcopy
 from .utils import get_aws_username_from_event
+import secrets
 
 
 class SplunkHecDelivery:
@@ -179,7 +179,7 @@ class SplunkHecDelivery:
                     return False
                 return True  # if no exception, just return
             except Exception:
-                sleep_sec = uniform(1, 4)  # random float 1 to 4
+                sleep_sec = secrets.SystemRandom().uniform(1, 4)  # random float 1 to 4
                 self.logger.warning(
                     "Caught exception sending to Splunk; " "retry in %s seconds", sleep_sec
                 )
