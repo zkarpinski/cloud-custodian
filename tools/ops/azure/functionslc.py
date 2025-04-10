@@ -5,13 +5,13 @@ import logging
 import time
 
 import click
-import requests
 from c7n_azure.policy import AzureFunctionMode
 from c7n.vendored.distutils.util import strtobool
 from enum import Enum
 
 from c7n.config import Config
 from c7n.policy import load as policy_load, PolicyCollection
+from security import safe_requests
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('AzureFunctionsLC')
@@ -56,14 +56,14 @@ def wait_for_remote_builds(deployments):
 
 def get_build_status(scm_uri):
     is_deploying_uri = '%s/api/isdeploying' % scm_uri
-    is_deploying = requests.get(is_deploying_uri).json()['value']
+    is_deploying = safe_requests.get(is_deploying_uri).json()['value']
 
     if strtobool(is_deploying):
         return DeploymentStatus.Active
 
     # Get build status
     deployments_uri = '%s/deployments' % scm_uri
-    r = requests.get(deployments_uri).json()
+    r = safe_requests.get(deployments_uri).json()
     if len(r) == 0:
         return DeploymentStatus.NotFound
 
