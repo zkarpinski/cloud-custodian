@@ -1107,7 +1107,8 @@ class AppELBTargetGroup(QueryResourceManager):
 
     class resource_type(TypeInfo):
         service = 'elbv2'
-        arn_type = 'target-group'
+        arn = 'TargetGroupArn'
+        arn_type = 'targetgroup'
         enum_spec = ('describe_target_groups', 'TargetGroups', None)
         name = 'TargetGroupName'
         id = 'TargetGroupArn'
