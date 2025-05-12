@@ -8,13 +8,13 @@ concurrent.futures implementation over sqs
 Scatter/Gather or Map/Reduce style over two sqs queues.
 
 """
-import random
 import logging
 import inspect
 
 from c7n import utils
 
 from concurrent.futures import Executor, Future
+import secrets
 
 log = logging.getLogger('custodian.sqsexec')
 
@@ -37,7 +37,7 @@ class SQSExecutor(Executor):
         self.map_queue = map_queue
         self.reduce_queue = reduce_queue
         self.sqs = utils.local_session(self.session_factory).client('sqs')
-        self.op_sequence = self.op_sequence_start = int(random.random() * 1000000)
+        self.op_sequence = self.op_sequence_start = int(secrets.SystemRandom().random() * 1000000)
         self.futures = {}
 
     def submit(self, func, *args, **kwargs):
