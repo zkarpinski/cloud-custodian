@@ -33,7 +33,7 @@ def create_html_file(config):
     rendered_file_path = os.path.join(
         script_path, config['rendered_filename'])
     environment = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(script_path))
+        loader=jinja2.FileSystemLoader(script_path), autoescape=True)
 
     environment_column = True if config['environment_tags'] else False
 
