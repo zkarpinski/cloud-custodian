@@ -36,6 +36,7 @@ from c7n.utils import (
     CONN_CACHE, dumps, filter_empty, format_string_values, get_policy_provider, join_output_path)
 
 from c7n_org.utils import environ, account_tags
+from security import safe_command
 
 log = logging.getLogger('c7n_org')
 
@@ -503,8 +504,7 @@ def run_account_script(account, region, output_dir, debug, script_args):
 
     with open(os.path.join(output_dir, 'stdout'), 'wb') as stdout:
         with open(os.path.join(output_dir, 'stderr'), 'wb') as stderr:
-            return subprocess.call(  # nosec
-                args=script_args, env=env, stdout=stdout, stderr=stderr)
+            return safe_command.run(subprocess.call, args=script_args, env=env, stdout=stdout, stderr=stderr)
 
 
 @cli.command(name='run-script', context_settings=dict(ignore_unknown_options=True))
