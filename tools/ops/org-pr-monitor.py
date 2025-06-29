@@ -155,7 +155,7 @@ def run(organization, hook_context, github_url, github_token,
 
     response = requests.post(
         github_url, headers=headers,
-        json={'query': query, 'variables': {'organization': organization}})
+        json={'query': query, 'variables': {'organization': organization}}, timeout=60)
 
     result = response.json()
 
